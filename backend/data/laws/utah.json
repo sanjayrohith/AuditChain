@@ -1,0 +1,13 @@
+{
+  "state": "Utah",
+  "law_name": "Utah Artificial Intelligence Policy Act",
+  "citation": "Utah Code § 13-72 (SB 149)",
+  "effective_date": "2024-05-01",
+  "summary": "Requires disclosure when AI is used in regulated interactions, particularly in consumer-facing applications. Establishes the AI Learning Laboratory for regulatory sandboxes.",
+  "applies_to_industries": ["all"],
+  "chunks": [
+    "A person who uses generative artificial intelligence to interact with another person in a regulated occupation context shall clearly and conspicuously disclose to the person with whom the AI is interacting that the person is interacting with generative AI. This disclosure must be made at the beginning of each interaction and in a manner reasonably likely to be noticed.",
+    "A person who uses generative AI to provide information or services in a regulated occupation shall ensure that a natural person is available to provide the same service upon request. The use of generative AI does not relieve a regulated person from any duty, obligation, or standard of care imposed by applicable law.",
+    "The Office of Artificial Intelligence Policy shall establish and operate an AI Learning Laboratory for the purpose of promoting responsible AI innovation. Persons participating in the laboratory may receive temporary exemptions from certain regulatory requirements while testing AI applications under the oversight of the office."
+  ]
+}

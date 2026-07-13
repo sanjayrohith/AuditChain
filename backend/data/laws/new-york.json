@@ -1,0 +1,13 @@
+{
+  "state": "New York",
+  "law_name": "New York City Automated Employment Decision Tools Law",
+  "citation": "NYC Local Law 144 of 2021",
+  "effective_date": "2023-07-05",
+  "summary": "Requires employers and employment agencies in NYC to conduct annual bias audits of automated employment decision tools and provide notice to candidates evaluated by such tools.",
+  "applies_to_industries": ["all"],
+  "chunks": [
+    "An employer or employment agency that uses an automated employment decision tool to screen candidates for employment in the city shall conduct a bias audit of such tool no more than one year prior to the use of the tool. A summary of the results of the most recent bias audit, including the source and explanation of the data used, the date of the audit, and the distributions assessed, must be made publicly available on the employer's website.",
+    "An employer or employment agency in the city shall not use an automated employment decision tool unless the tool has been subject to a bias audit within one year of the use. An independent auditor must conduct the bias audit, which must assess the tool's selection rate, scoring, and impact ratio across race/ethnicity and sex categories.",
+    "An employer must notify each candidate who resides in New York City and is subject to an automated employment decision tool at least 10 business days before such use. The notice must state that an AEDT will be used, the job qualifications and characteristics the tool will assess, and information about how to request an alternative selection process or accommodation."
+  ]
+}

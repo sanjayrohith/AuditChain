@@ -1,0 +1,13 @@
+{
+  "state": "Colorado",
+  "law_name": "Colorado Artificial Intelligence Act",
+  "citation": "C.R.S. § 6-1-1701 et seq. (SB 24-205)",
+  "effective_date": "2026-02-01",
+  "summary": "Requires developers and deployers of high-risk AI systems to use reasonable care to avoid algorithmic discrimination. Mandates impact assessments, transparency, and consumer notification.",
+  "applies_to_industries": ["all"],
+  "chunks": [
+    "A deployer of a high-risk artificial intelligence system shall use reasonable care to protect consumers from any known or reasonably foreseeable risks of algorithmic discrimination arising from the intended and contracted uses of the high-risk AI system. Deployers must complete an impact assessment for each high-risk AI system before deployment and annually thereafter.",
+    "A deployer must provide to a consumer a statement disclosing the purpose and nature of the high-risk AI system, how to contest an adverse decision, and the deployer's contact information. If the AI system makes or is a substantial factor in making a consequential decision concerning a consumer, the deployer must notify the consumer that the AI system was used.",
+    "Developers of high-risk AI systems must provide deployers with documentation including a general description of the reasonably foreseeable uses and known harmful or inappropriate uses, a high-level summary of the training data, known limitations, and the results of any evaluations conducted to assess the system's performance and mitigation of algorithmic discrimination."
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "state": "California",
+  "law_name": "California Consumer Privacy Act - Automated Decision-Making Technology",
+  "citation": "Cal. Civ. Code § 1798.185(a)(16) (CPPA ADMT Regulations)",
+  "effective_date": "2024-07-01",
+  "summary": "Requires businesses using automated decision-making technology to provide consumers with access to information about the logic, opt-out rights, and pre-use notices when decisions produce legal or significant effects.",
+  "applies_to_industries": ["all"],
+  "chunks": [
+    "A business that uses automated decision-making technology to make a decision that produces legal or similarly significant effects concerning a consumer shall provide that consumer with access to information about the automated decision-making technology, including a plain language explanation of the logic used, the consumer's right to opt out of such processing, and notice prior to the use of such technology.",
+    "Businesses must conduct risk assessments before deploying automated decision-making technology that processes consumers' personal information to make decisions producing legal or similarly significant effects. The assessment must identify and weigh the benefits and risks of the processing, including risks to consumers' privacy and civil rights.",
+    "Consumers have the right to opt out of a business's use of automated decision-making technology for decisions that produce legal or similarly significant effects. Businesses must provide a clear and conspicuous link titled 'Opt-Out of Automated Decision-Making' on their website or application."
+  ]
+}

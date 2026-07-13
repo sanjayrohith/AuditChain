@@ -1,0 +1,13 @@
+{
+  "state": "Virginia",
+  "law_name": "Virginia High-Risk Artificial Intelligence Developer and Deployer Act",
+  "citation": "VA Code § 59.1-600 et seq. (HB 2094)",
+  "effective_date": "2025-07-01",
+  "summary": "Requires developers and deployers of high-risk AI systems to conduct impact assessments, maintain documentation, and provide transparency regarding automated consequential decisions.",
+  "applies_to_industries": ["all"],
+  "chunks": [
+    "A deployer of a high-risk AI system shall conduct an impact assessment prior to deploying or significantly modifying such system. The assessment must identify the purpose, intended use cases, benefits, and known risks of the system, including risks of algorithmic discrimination and adverse impacts on consumers' civil rights.",
+    "A deployer must disclose to any person subject to a consequential decision made by or with the substantial assistance of a high-risk AI system: (i) that a high-risk AI system was used, (ii) the contact information of the deployer, and (iii) a description of the purpose and output of the system. The person must be given an opportunity to appeal the decision through human review.",
+    "Developers of high-risk AI systems must make available to deployers documentation describing the intended uses, known limitations, and risk mitigation measures of the system, and must provide the results of any testing conducted to evaluate performance and detect algorithmic discrimination."
+  ]
+}

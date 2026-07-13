@@ -1,0 +1,13 @@
+{
+  "state": "Illinois",
+  "law_name": "Illinois Artificial Intelligence Video Interview Act",
+  "citation": "820 ILCS 42 (HB 3773)",
+  "effective_date": "2020-01-01",
+  "summary": "Regulates the use of AI analysis in video interviews for employment decisions. Requires notice, consent, data destruction, and limits on sharing video data.",
+  "applies_to_industries": ["all"],
+  "chunks": [
+    "An employer that asks applicants to record video interviews and uses artificial intelligence analysis of the applicant-submitted videos shall notify each applicant before the interview that AI may be used to analyze the applicant's video interview and consider the applicant's fitness for the position. The employer must provide information explaining how the AI works and what characteristics it uses to evaluate applicants.",
+    "An employer may not use artificial intelligence to evaluate applicants unless the applicant consents to the use of AI analysis. The employer must obtain written consent from the applicant before using AI to analyze the video interview. If an applicant does not consent, the employer may not use AI analysis on that applicant's interview.",
+    "An employer relying on AI analysis of video interviews must collect and report demographic data on the race and ethnicity of applicants who are and are not offered positions. If the AI produces a bias against a protected class, the employer must stop using that AI tool. All video recordings must be destroyed within 30 days of an applicant's request."
+  ]
+}
