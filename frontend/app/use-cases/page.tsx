@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -11,9 +10,17 @@ import {
   Pencil,
   Trash2,
   Scan,
-  Toggle,
-  ChevronDown,
 } from "lucide-react";
+
+import {
+  getAiSystems,
+  createAiSystem,
+  updateAiSystem,
+  deleteAiSystem as deleteAiSystemApi,
+  analyzeAiSystem,
+  analyzeAllSystems,
+  type AiSystem as AiSystemType,
+} from "@/lib/api";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -24,6 +31,8 @@ type AISystem = {
   provider: string;
   description: string;
   affectsPeople: boolean;
+  status: string;
+  matchCount: number;
 };
 
 // ─── Static options ───────────────────────────────────────────────────────────
@@ -47,29 +56,6 @@ const providers = [
   "Azure OpenAI",
   "Custom Model",
   "Other",
-];
-
-// ─── Seed data ────────────────────────────────────────────────────────────────
-
-const seedSystems: AISystem[] = [
-  {
-    id: "1",
-    name: "Resume Screening AI",
-    category: "Hiring",
-    provider: "AWS Bedrock",
-    description:
-      "We use AI to automatically rank job applicants before a recruiter performs the final review.",
-    affectsPeople: true,
-  },
-  {
-    id: "2",
-    name: "Customer Churn Predictor",
-    category: "Customer Support",
-    provider: "OpenAI",
-    description:
-      "Predicts which customers are likely to cancel their subscription in the next 30 days.",
-    affectsPeople: false,
-  },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -128,13 +114,15 @@ function SystemCard({
   system,
   onEdit,
   onDelete,
+  onAnalyze,
+  analyzing,
 }: {
   system: AISystem;
   onEdit: (s: AISystem) => void;
   onDelete: (id: string) => void;
+  onAnalyze: (id: string) => void;
+  analyzing: boolean;
 }) {
-  const router = useRouter();
-
   return (
     <div className="border border-foreground/10 bg-background flex flex-col">
       {/* Card header */}
@@ -143,54 +131,47 @@ function SystemCard({
           <h3 className="text-base font-sans font-medium text-foreground leading-snug">
             {system.name}
           </h3>
-          <span className="inline-flex items-center px-2 py-0.5 border border-foreground/15 text-xs font-mono text-muted-foreground shrink-0">
-            Ready for Analysis
+          <span className={`inline-flex items-center px-2 py-0.5 border text-xs font-mono shrink-0 ${
+            system.status === "analyzed"
+              ? "border-foreground/25 text-foreground bg-foreground/10"
+              : "border-foreground/15 text-muted-foreground"
+          }`}>
+            {system.status === "analyzed" ? `Analyzed (${system.matchCount} matches)` : "Ready for Analysis"}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
-              Category
-            </span>
+            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Category</span>
             <CategoryBadge category={system.category} />
           </div>
           <div className="w-px h-3 bg-foreground/15" />
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
-              Provider
-            </span>
-            <span className="text-xs font-mono text-foreground">
-              {system.provider}
-            </span>
+            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Provider</span>
+            <span className="text-xs font-mono text-foreground">{system.provider}</span>
           </div>
           <div className="w-px h-3 bg-foreground/15" />
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
-              Affects People
-            </span>
-            <span className="text-xs font-mono text-foreground">
-              {system.affectsPeople ? "Yes" : "No"}
-            </span>
+            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Affects People</span>
+            <span className="text-xs font-mono text-foreground">{system.affectsPeople ? "Yes" : "No"}</span>
           </div>
         </div>
       </div>
 
       {/* Description */}
       <div className="px-6 py-4 flex-1">
-        <p className="text-sm font-sans text-muted-foreground leading-relaxed line-clamp-3">
-          {system.description}
-        </p>
+        <p className="text-sm font-sans text-muted-foreground leading-relaxed line-clamp-3">{system.description}</p>
       </div>
 
       {/* Actions */}
       <div className="px-6 py-4 border-t border-foreground/10 flex items-center gap-3">
         <Button
           size="sm"
-          onClick={() => router.push("/law-matches")}
-          className="bg-foreground hover:bg-foreground/90 text-background px-4 h-9 text-xs rounded-full group"
+          onClick={() => onAnalyze(system.id)}
+          disabled={analyzing}
+          className="bg-foreground hover:bg-foreground/90 text-background px-4 h-9 text-xs rounded-full group disabled:opacity-50"
         >
-          Analyze
-          <ArrowRight className="w-3 h-3 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+          {analyzing ? "Analyzing..." : "Analyze"}
+          {!analyzing && <ArrowRight className="w-3 h-3 ml-1.5 transition-transform group-hover:translate-x-0.5" />}
         </Button>
         <button
           onClick={() => onEdit(system)}
@@ -215,7 +196,11 @@ function SystemCard({
 
 export default function UseCasesPage() {
   const [isVisible, setIsVisible] = useState(false);
-  const [systems, setSystems] = useState<AISystem[]>(seedSystems);
+  const [systems, setSystems] = useState<AISystem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [analyzingAll, setAnalyzingAll] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Form state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -224,13 +209,39 @@ export default function UseCasesPage() {
   const [provider, setProvider] = useState("");
   const [description, setDescription] = useState("");
   const [affectsPeople, setAffectsPeople] = useState(false);
-
-  // Scroll the form into view when editing starts
-  const formRef = useState<HTMLElement | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
+    loadSystems();
   }, []);
+
+  async function loadSystems() {
+    const orgId = localStorage.getItem("orgId");
+    if (!orgId) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const result = await getAiSystems(orgId);
+      setSystems(
+        result.map((s) => ({
+          id: s.id,
+          name: s.name,
+          category: s.category || "Other",
+          provider: s.aiProvider || "Other",
+          description: s.description,
+          affectsPeople: s.affectsPeople,
+          status: s.status,
+          matchCount: s.matchCount,
+        }))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load systems");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function resetForm() {
     setEditingId(null);
@@ -255,37 +266,77 @@ export default function UseCasesPage() {
     scrollToForm();
   }
 
-  function handleDelete(id: string) {
-    setSystems((prev) => prev.filter((s) => s.id !== id));
+  async function handleDelete(id: string) {
+    try {
+      await deleteAiSystemApi(id);
+      setSystems((prev) => prev.filter((s) => s.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete");
+    }
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!isFormValid) return;
-
-    if (editingId) {
-      setSystems((prev) =>
-        prev.map((s) =>
-          s.id === editingId
-            ? { ...s, name, category, provider, description, affectsPeople }
-            : s
-        )
-      );
-    } else {
-      setSystems((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          name,
-          category,
-          provider,
-          description,
-          affectsPeople,
-        },
-      ]);
+  async function handleAnalyze(id: string) {
+    setAnalyzingId(id);
+    try {
+      await analyzeAiSystem(id);
+      await loadSystems();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Analysis failed");
+    } finally {
+      setAnalyzingId(null);
     }
+  }
 
-    resetForm();
+  async function handleAnalyzeAll() {
+    const orgId = localStorage.getItem("orgId");
+    if (!orgId) return;
+    setAnalyzingAll(true);
+    try {
+      await analyzeAllSystems(orgId);
+      await loadSystems();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Analysis failed");
+    } finally {
+      setAnalyzingAll(false);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isFormValid || submitting) return;
+
+    const orgId = localStorage.getItem("orgId");
+    if (!orgId) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      if (editingId) {
+        await updateAiSystem(editingId, {
+          name,
+          description,
+          category,
+          aiProvider: provider,
+          affectsPeople,
+        });
+      } else {
+        await createAiSystem({
+          orgId,
+          name,
+          description,
+          category,
+          aiProvider: provider,
+          affectsPeople,
+        });
+      }
+      resetForm();
+      await loadSystems();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const isFormValid =
@@ -358,12 +409,11 @@ export default function UseCasesPage() {
           <Button
             size="lg"
             className="bg-foreground hover:bg-foreground/90 text-background px-6 h-12 text-sm rounded-full group shrink-0"
-            asChild
+            onClick={handleAnalyzeAll}
+            disabled={analyzingAll}
           >
-            <Link href="/law-matches">
-              Analyze All Systems
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-            </Link>
+            {analyzingAll ? "Analyzing..." : "Analyze All Systems"}
+            {!analyzingAll && <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />}
           </Button>
         </div>
 
@@ -507,14 +557,15 @@ export default function UseCasesPage() {
 
               {/* Actions */}
               <div className="flex items-center gap-4">
+                {error && <p className="text-sm text-red-500 font-mono">{error}</p>}
                 <Button
                   type="submit"
                   size="lg"
-                  disabled={!isFormValid}
+                  disabled={!isFormValid || submitting}
                   className="bg-foreground hover:bg-foreground/90 text-background px-8 h-12 text-sm rounded-full group disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  {editingId ? "Save Changes" : "Add AI System"}
+                  {submitting ? "Saving..." : editingId ? "Save Changes" : "Add AI System"}
                 </Button>
                 {editingId && (
                   <button
@@ -561,6 +612,8 @@ export default function UseCasesPage() {
                   system={system}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onAnalyze={handleAnalyze}
+                  analyzing={analyzingId === system.id}
                 />
               ))}
             </div>

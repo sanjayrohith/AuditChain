@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, Scan, Scale, FileText, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
+import { createOrganization, createAiSystem } from "@/lib/api";
+
 const industries = [
   "Human Resources",
   "Retail",
@@ -61,6 +63,8 @@ export default function OnboardingPage() {
   const [companySize, setCompanySize] = useState("");
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
   const [aiDescription, setAiDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -72,9 +76,55 @@ export default function OnboardingPage() {
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    router.push("/dashboard");
+    if (!isValid || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Map state IDs to full names for the backend
+      const stateNameMap: Record<string, string> = {
+        CA: "California",
+        IL: "Illinois",
+        CO: "Colorado",
+        VA: "Virginia",
+        NY: "New York",
+        UT: "Utah",
+      };
+      const stateNames = selectedStates.map((id) => stateNameMap[id] || id);
+
+      // 1. Create the organization
+      const org = await createOrganization({
+        name: companyName,
+        industry,
+        companySize,
+        states: stateNames,
+        email: `admin@${companyName.toLowerCase().replace(/\s+/g, "")}.com`,
+      });
+
+      // Store orgId for other pages
+      localStorage.setItem("orgId", org.id);
+      if (org.demoApiKey) {
+        localStorage.setItem("demoApiKey", org.demoApiKey);
+      }
+
+      // 2. Create the first AI system from the description
+      await createAiSystem({
+        orgId: org.id,
+        name: "Initial AI System",
+        description: aiDescription,
+        category: "Other",
+        affectsPeople: true,
+      });
+
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const isValid =
@@ -281,14 +331,17 @@ export default function OnboardingPage() {
 
               {/* Submit */}
               <div className="flex flex-col gap-4 pt-2">
+                {error && (
+                  <p className="text-sm text-red-500 font-mono">{error}</p>
+                )}
                 <Button
                   type="submit"
                   size="lg"
-                  disabled={!isValid}
+                  disabled={!isValid || isSubmitting}
                   className="bg-foreground hover:bg-foreground/90 text-background px-8 h-14 text-base rounded-full group w-full sm:w-auto sm:self-start disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Start Compliance Assessment
-                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                  {isSubmitting ? "Setting up..." : "Start Compliance Assessment"}
+                  {!isSubmitting && <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />}
                 </Button>
 
                 {/* Footer note */}
